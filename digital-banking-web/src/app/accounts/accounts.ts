@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AccountService } from '../services/AccountService'; // <-- BIEN IMPORTER CE SERVICE
+import { AccountService } from '../services/AccountService';
 import { Observable, catchError, throwError } from 'rxjs';
 import { AccountDetails } from '../model/account.model';
+import { AuthService } from '../services/auth.service'; // <-- 1. AJOUTE CET IMPORT
 
 @Component({
   selector: 'app-accounts',
@@ -20,8 +21,12 @@ export class Accounts implements OnInit {
   accountDetails$!: Observable<AccountDetails>;
   errorMessage!: string;
 
-  // CORRECTION : On injecte bien AccountService ici !
-  constructor(private fb: FormBuilder, private accountService: AccountService) {}
+  // <-- 2. MODIFICATION ICI : On ajoute "public authService: AuthService"
+  constructor(
+    private fb: FormBuilder,
+    private accountService: AccountService,
+    public authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.accountFormGroup = this.fb.group({
@@ -65,7 +70,7 @@ export class Accounts implements OnInit {
           this.operationFormGroup.reset({operationType: 'CREDIT', amount: 0});
           this.handleSearchAccount();
         },
-        error: (err: any) => console.log(err) // <-- AJOUT DE (err: any) POUR FIXER L'ERREUR TS7006
+        error: (err: any) => console.log(err)
       });
     } else if (operationType === 'DEBIT') {
       this.accountService.debit(accountId, amount, description).subscribe({
@@ -74,7 +79,7 @@ export class Accounts implements OnInit {
           this.operationFormGroup.reset({operationType: 'DEBIT', amount: 0});
           this.handleSearchAccount();
         },
-        error: (err: any) => console.log(err) // <-- IDEM ICI
+        error: (err: any) => console.log(err)
       });
     } else if (operationType === 'TRANSFER') {
       this.accountService.transfer(accountId, accountDestination, amount, description).subscribe({
@@ -83,7 +88,7 @@ export class Accounts implements OnInit {
           this.operationFormGroup.reset({operationType: 'TRANSFER', amount: 0});
           this.handleSearchAccount();
         },
-        error: (err: any) => console.log(err) // <-- ET ICI
+        error: (err: any) => console.log(err)
       });
     }
   }
